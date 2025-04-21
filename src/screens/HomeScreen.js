@@ -5,9 +5,9 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
-import { Button } from "react-native-paper";
-import * as Progress from "react-native-progress";
+import { format } from "date-fns";
 import {
   getTransactions,
   getBudget,
@@ -15,7 +15,7 @@ import {
   getExpenses,
   getUser,
 } from "../api/api";
-import { format } from "date-fns";
+import * as Progress from "react-native-progress";
 
 const HomeScreen = ({ navigation }) => {
   const [userName, setUserName] = useState("Raush");
@@ -23,11 +23,9 @@ const HomeScreen = ({ navigation }) => {
   const [totalBalance, setTotalBalance] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
   const [budgetProgress, setBudgetProgress] = useState(0);
-  const [savingsProgress, setSavingsProgress] = useState(0);
-  const [revenueLastWeek, setRevenueLastWeek] = useState(0);
-  const [foodLastWeek, setFoodLastWeek] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [filter, setFilter] = useState("Monthly");
+  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
 
   const fetchUserData = async () => {
     try {
@@ -62,34 +60,10 @@ const HomeScreen = ({ navigation }) => {
       const budget = data.budgets[0];
       if (budget) {
         const spentPercentage = (budget.spent / budget.amount) * 100;
-        const remainingPercentage = (budget.remaining / budget.amount) * 100;
         setBudgetProgress(spentPercentage / 100);
-        setSavingsProgress(remainingPercentage / 100);
       }
     } catch (error) {
       console.error("Fetch Budget Error:", error);
-    }
-  };
-
-  const fetchLastWeekData = async () => {
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 7);
-    try {
-      const { data } = await getTransactions({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-      });
-      const salary = data.incomeByCategory.find(
-        (cat) => cat.categoryName === "Salary"
-      );
-      const food = data.expensesByCategory.find(
-        (cat) => cat.categoryName === "Food"
-      );
-      setRevenueLastWeek(salary?.total || 0);
-      setFoodLastWeek(food?.total || 0);
-    } catch (error) {
-      console.error("Fetch Last Week Error:", error);
     }
   };
 
@@ -144,13 +118,21 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  // Function to handle pull-to-refresh
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      fetchUserData(),
+      setTimeBasedGreeting(),
+      fetchTotals(),
+      fetchBudgetData(),
+      fetchTransactions(filter),
+    ]);
+    setRefreshing(false);
+  };
+
   useEffect(() => {
-    fetchUserData();
-    setTimeBasedGreeting();
-    fetchTotals();
-    fetchBudgetData();
-    fetchLastWeekData();
-    fetchTransactions(filter);
+    handleRefresh(); // Initial load
   }, []);
 
   useEffect(() => {
@@ -202,7 +184,7 @@ const HomeScreen = ({ navigation }) => {
           <Progress.Bar
             progress={budgetProgress}
             width={200}
-            color="#00D09E"
+            color="#052224"
             unfilledColor="#E0E0E0"
             borderWidth={0}
             style={styles.progressBar}
@@ -217,32 +199,19 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      <View style={styles.statsContainer}>
-        <View style={styles.savingsCard}>
-          <Progress.Circle
-            progress={savingsProgress}
-            size={60}
-            thickness={5}
-            color="#00D09E"
-            unfilledColor="#E0E0E0"
-            borderWidth={0}
-          />
-          <Text style={styles.savingsText}>Savings on Goals</Text>
-        </View>
-        <View style={styles.lastWeekCard}>
-          <Text style={styles.lastWeekLabel}>Revenue Last Week</Text>
-          <Text style={styles.lastWeekAmount}>
-            $
-            {revenueLastWeek.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-            })}
-          </Text>
-          <Text style={styles.lastWeekLabel}>Food Last Week</Text>
-          <Text style={styles.lastWeekAmount}>
-            -$
-            {foodLastWeek.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </Text>
-        </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.viewButton}
+          onPress={() => navigation.navigate("BudgetScreen")}
+        >
+          <Text style={styles.viewButtonText}>View Budgets</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.viewButton}
+          onPress={() => navigation.navigate("LoanScreen")}
+        >
+          <Text style={styles.viewButtonText}>View Loans</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.filterContainer}>
@@ -307,6 +276,14 @@ const HomeScreen = ({ navigation }) => {
           keyExtractor={(item) => item._id}
           style={styles.transactionList}
           contentContainerStyle={{ paddingBottom: 80 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={["#00D09E"]} // Spinner color
+              tintColor="#00D09E" // iOS spinner color
+            />
+          }
         />
       )}
     </View>
@@ -315,7 +292,7 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F1FFF3", padding: 20 },
-  header: { marginBottom: 20 },
+  header: { marginBottom: 20, marginTop: 30 },
   greeting: { fontSize: 24, fontWeight: "bold", color: "#0E3E3E" },
   subGreeting: { fontSize: 16, color: "#0E3E3E" },
   balanceContainer: {
@@ -352,36 +329,22 @@ const styles = StyleSheet.create({
     color: "#F1FFF3",
     marginTop: 5,
   },
-  statsContainer: {
+  buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 20,
   },
-  savingsCard: {
+  viewButton: {
+    backgroundColor: "#00D09E",
+    padding: 15,
+    borderRadius: 15,
+    width: "48%",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    padding: 15,
-    borderRadius: 15,
-    width: "35%",
   },
-  savingsText: {
-    fontSize: 14,
-    color: "#0E3E3E",
-    marginTop: 5,
-    textAlign: "center",
-  },
-  lastWeekCard: {
-    backgroundColor: "#FFFFFF",
-    padding: 15,
-    borderRadius: 15,
-    width: "60%",
-  },
-  lastWeekLabel: { fontSize: 14, color: "#0E3E3E" },
-  lastWeekAmount: {
+  viewButtonText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#0E3E3E",
-    marginBottom: 10,
+    color: "#F1FFF3",
   },
   filterContainer: {
     flexDirection: "row",

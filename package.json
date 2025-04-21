@@ -11,9 +11,11 @@
   "dependencies": {
     "@expo/metro-config": "^0.19.12",
     "@expo/vector-icons": "^14.1.0",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/datetimepicker": "^8.2.0",
     "@react-native-picker/picker": "^2.9.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
+    "@react-navigation/material-top-tabs": "^7.2.10",
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/stack": "^7.2.10",
     "axios": "^1.8.4",
@@ -24,8 +26,14 @@
     "expo-status-bar": "~2.0.1",
     "react": "18.3.1",
     "react-native": "0.76.9",
+    "react-native-modal": "^14.0.0-rc.1",
+    "react-native-pager-view": "^6.7.0",
     "react-native-paper": "^5.13.1",
-    "react-native-progress": "^5.0.1"
+    "react-native-progress": "^5.0.1",
+    "react-native-safe-area-context": "^5.4.0",
+    "react-native-screens": "^4.10.0",
+    "react-native-switch": "^1.5.1",
+    "react-native-tab-view": "^4.0.10"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

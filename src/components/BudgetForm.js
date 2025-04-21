@@ -2,24 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Modal from 'react-native-modal';
-import { Switch } from 'react-native-switch';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, addDays } from 'date-fns';
-import { getCategories, addCategory, addExpense } from '../api/api';
+import { getCategories, addCategory, addBudget } from '../api/api';
 
-const ExpenseForm = () => {
+const BudgetForm = () => {
   const [form, setForm] = useState({
     categoryId: '',
+    budgetName: '',
     amount: '',
-    paymentMethod: 'cash',
-    date: new Date(),
-    notes: '',
-    isRecurring: false,
-    frequency: 'daily',
+    startDate: new Date(),
     endDate: addDays(new Date(), 1),
+    notes: '',
   });
   const [categories, setCategories] = useState([]);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', type: 'expense' });
@@ -49,42 +46,36 @@ const ExpenseForm = () => {
   };
 
   const handleSubmit = async () => {
-    const formattedDate = format(form.date, 'yyyy-MM-dd');
-    const formattedEndDate = form.isRecurring ? format(form.endDate, 'yyyy-MM-dd') : undefined;
+    const formattedStartDate = format(form.startDate, 'yyyy-MM-dd');
+    const formattedEndDate = format(form.endDate, 'yyyy-MM-dd');
 
-    if (form.isRecurring && form.endDate <= form.date) {
+    if (form.endDate <= form.startDate) {
       alert('End date must be after start date');
       return;
     }
 
     const payload = {
       categoryId: form.categoryId,
+      budgetName: form.budgetName,
       amount: form.amount,
-      paymentMethod: form.paymentMethod,
-      date: formattedDate,
+      startDate: formattedStartDate,
+      endDate: formattedEndDate,
       notes: form.notes,
-      isRecurring: form.isRecurring,
     };
-    if (form.isRecurring) {
-      payload.frequency = form.frequency;
-      payload.endDate = formattedEndDate;
-    }
 
     try {
-      await addExpense(payload);
-      alert('Expense added successfully!');
+      await addBudget(payload);
+      alert('Budget added successfully!');
       setForm({
         categoryId: '',
+        budgetName: '',
         amount: '',
-        paymentMethod: 'cash',
-        date: new Date(),
-        notes: '',
-        isRecurring: false,
-        frequency: 'daily',
+        startDate: new Date(),
         endDate: addDays(new Date(), 1),
+        notes: '',
       });
     } catch (error) {
-      alert(error.response?.data?.message || 'Error adding expense');
+      alert(error.response?.data?.message || 'Error adding budget');
     }
   };
 
@@ -143,6 +134,14 @@ const ExpenseForm = () => {
         </View>
       </Modal>
 
+      <Text style={styles.label}>Budget Name</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter budget name"
+        value={form.budgetName}
+        onChangeText={(text) => setForm({ ...form, budgetName: text })}
+      />
+
       <Text style={styles.label}>Amount</Text>
       <TextInput
         style={styles.input}
@@ -152,89 +151,46 @@ const ExpenseForm = () => {
         keyboardType="numeric"
       />
 
-      <Text style={styles.label}>Payment Method</Text>
-      <Picker
-        selectedValue={form.paymentMethod}
-        style={styles.input}
-        onValueChange={(value) => setForm({ ...form, paymentMethod: value })}
-      >
-        <Picker.Item label="Cash" value="cash" />
-        <Picker.Item label="Card" value="card" />
-        <Picker.Item label="Bank" value="bank" />
-        <Picker.Item label="Mobile" value="mobile" />
-      </Picker>
-
-      <Text style={styles.label}>Date</Text>
-      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+      <Text style={styles.label}>Start Date</Text>
+      <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
         <TextInput
           style={styles.input}
-          placeholder="Select date"
-          value={format(form.date, 'yyyy-MM-dd')}
+          placeholder="Select start date"
+          value={format(form.startDate, 'yyyy-MM-dd')}
           editable={false}
         />
       </TouchableOpacity>
-      {showDatePicker && (
+      {showStartDatePicker && (
         <DateTimePicker
-          value={form.date}
+          value={form.startDate}
           mode="date"
           display="default"
           onChange={(event, selectedDate) => {
-            setShowDatePicker(false);
-            if (selectedDate) setForm({ ...form, date: selectedDate });
+            setShowStartDatePicker(false);
+            if (selectedDate) setForm({ ...form, startDate: selectedDate });
           }}
         />
       )}
 
-      <View style={styles.toggleContainer}>
-        <Text style={styles.label}>Recurring</Text>
-        <Switch
-          value={form.isRecurring}
-          onValueChange={(value) => setForm({ ...form, isRecurring: value })}
-          circleSize={30}
-          barHeight={30}
-          circleBorderWidth={0}
-          backgroundActive={'#00D09E'}
-          backgroundInactive={'#ccc'}
-          circleActiveColor={'#fff'}
-          circleInActiveColor={'#fff'}
+      <Text style={styles.label}>End Date</Text>
+      <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
+        <TextInput
+          style={styles.input}
+          placeholder="Select end date"
+          value={format(form.endDate, 'yyyy-MM-dd')}
+          editable={false}
         />
-      </View>
-
-      {form.isRecurring && (
-        <>
-          <Text style={styles.label}>Frequency</Text>
-          <Picker
-            selectedValue={form.frequency}
-            style={styles.input}
-            onValueChange={(value) => setForm({ ...form, frequency: value })}
-          >
-            <Picker.Item label="Daily" value="daily" />
-            <Picker.Item label="Weekly" value="weekly" />
-            <Picker.Item label="Monthly" value="monthly" />
-            <Picker.Item label="Yearly" value="yearly" />
-          </Picker>
-
-          <Text style={styles.label}>End Date</Text>
-          <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
-            <TextInput
-              style={styles.input}
-              placeholder="Select end date"
-              value={format(form.endDate, 'yyyy-MM-dd')}
-              editable={false}
-            />
-          </TouchableOpacity>
-          {showEndDatePicker && (
-            <DateTimePicker
-              value={form.endDate}
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowEndDatePicker(false);
-                if (selectedDate) setForm({ ...form, endDate: selectedDate });
-              }}
-            />
-          )}
-        </>
+      </TouchableOpacity>
+      {showEndDatePicker && (
+        <DateTimePicker
+          value={form.endDate}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowEndDatePicker(false);
+            if (selectedDate) setForm({ ...form, endDate: selectedDate });
+          }}
+        />
       )}
 
       <Text style={styles.label}>Notes (Optional)</Text>
@@ -247,7 +203,7 @@ const ExpenseForm = () => {
       />
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Add Expense</Text>
+        <Text style={styles.submitButtonText}>Add Budget</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -274,12 +230,6 @@ const styles = StyleSheet.create({
   notesInput: {
     height: 100,
     textAlignVertical: 'top',
-  },
-  toggleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
   },
   modalContent: {
     backgroundColor: '#F5FBFA',
@@ -348,4 +298,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ExpenseForm;
+export default BudgetForm;

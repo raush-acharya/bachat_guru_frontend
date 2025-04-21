@@ -19,6 +19,9 @@ import AnalysisScreen from "../screens/AnalysisScreen";
 import AddTransactionScreen from "../screens/AddTransactionScreen";
 import TransactionsScreen from "../screens/TransactionsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import BudgetScreen from "../screens/BudgetScreen";
+import LoanScreen from "../screens/LoanScreen";
+import PayLoanScreen from "../screens/PayLoanScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -39,12 +42,22 @@ const MainTabs = () => (
         let iconName;
 
         if (route.name === "Home") iconName = focused ? "home" : "home-outline";
-        else if (route.name === "Analysis") iconName = focused ? "bar-chart" : "bar-chart-outline";
-        else if (route.name === "AddTransaction") iconName = focused ? "add-circle" : "add-circle-outline";
-        else if (route.name === "Transactions") iconName = focused ? "swap-horizontal" : "swap-horizontal-outline";
-        else if (route.name === "Profile") iconName = focused ? "person" : "person-outline";
+        else if (route.name === "Analysis")
+          iconName = focused ? "bar-chart" : "bar-chart-outline";
+        else if (route.name === "AddTransaction")
+          iconName = focused ? "add-circle" : "add-circle-outline";
+        else if (route.name === "Transactions")
+          iconName = focused ? "swap-horizontal" : "swap-horizontal-outline";
+        else if (route.name === "Profile")
+          iconName = focused ? "person" : "person-outline";
 
-        const icon = <Ionicons name={iconName} size={24} color={focused ? "#fff" : "#0E3E3E"} />;
+        const icon = (
+          <Ionicons
+            name={iconName}
+            size={24}
+            color={focused ? "#fff" : "#0E3E3E"}
+          />
+        );
 
         return focused ? (
           <View
@@ -83,26 +96,89 @@ const MainTabs = () => (
       },
     })}
   >
-    <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-    <Tab.Screen name="Analysis" component={AnalysisScreen} options={{ headerShown: false }} />
-    <Tab.Screen name="AddTransaction" component={AddTransactionScreen} options={{ headerShown: false, title: "" }} />
-    <Tab.Screen name="Transactions" component={TransactionsScreen} options={{ headerShown: false }} />
-    <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
+    <Tab.Screen
+      name="Home"
+      component={HomeScreen}
+      options={{ headerShown: false }}
+    />
+    <Tab.Screen
+      name="Analysis"
+      component={AnalysisScreen}
+      options={{ headerShown: false }}
+    />
+    <Tab.Screen
+      name="AddTransaction"
+      component={AddTransactionScreen}
+      options={{ headerShown: false, title: "" }}
+    />
+    <Tab.Screen
+      name="Transactions"
+      component={TransactionsScreen}
+      options={{ headerShown: false }}
+    />
+    <Tab.Screen
+      name="Profile"
+      component={ProfileScreen}
+      options={{ headerShown: false }}
+    />
   </Tab.Navigator>
 );
 
 const AppNavigator = () => (
   <NavigationContainer linking={linking}>
     <Stack.Navigator initialRouteName="Login">
-      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="PasswordChanged" component={PasswordChangedScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="CheckEmail" component={CheckEmailScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SignUp"
+        component={SignUpScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PasswordChanged"
+        component={PasswordChangedScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CheckEmail"
+        component={CheckEmailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Main"
+        component={MainTabs}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="Expenses" component={ExpenseScreen} />
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      <Stack.Screen
+        name="BudgetScreen"
+        component={BudgetScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="LoanScreen"
+        component={LoanScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+          name="PayLoanScreen"
+          component={PayLoanScreen}
+          options={{ headerShown: false }}
+        />
     </Stack.Navigator>
   </NavigationContainer>
 );

@@ -5,9 +5,9 @@ import Modal from 'react-native-modal';
 import { Switch } from 'react-native-switch';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, addDays } from 'date-fns';
-import { getCategories, addCategory, addExpense } from '../api/api';
+import { getCategories, addCategory, addIncome } from '../api/api';
 
-const ExpenseForm = () => {
+const IncomeForm = () => {
   const [form, setForm] = useState({
     categoryId: '',
     amount: '',
@@ -16,18 +16,18 @@ const ExpenseForm = () => {
     notes: '',
     isRecurring: false,
     frequency: 'daily',
-    endDate: addDays(new Date(), 1),
+    endDate: addDays(new Date(), 1), // Default end date is 1 day after start
   });
   const [categories, setCategories] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [newCategory, setNewCategory] = useState({ name: '', type: 'expense' });
+  const [newCategory, setNewCategory] = useState({ name: '', type: 'income' });
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await getCategories({ type: 'expense' });
+        const response = await getCategories({ type: 'income' });
         setCategories(response.data.categories || []);
       } catch (error) {
         alert('Error fetching categories');
@@ -40,7 +40,7 @@ const ExpenseForm = () => {
     try {
       const response = await addCategory(newCategory);
       setCategories([...categories, response.data.category]);
-      setNewCategory({ name: '', type: 'expense' });
+      setNewCategory({ name: '', type: 'income' });
       setModalVisible(false);
       alert('Category added successfully!');
     } catch (error) {
@@ -49,14 +49,17 @@ const ExpenseForm = () => {
   };
 
   const handleSubmit = async () => {
+    // Format dates to YYYY-MM-DD
     const formattedDate = format(form.date, 'yyyy-MM-dd');
     const formattedEndDate = form.isRecurring ? format(form.endDate, 'yyyy-MM-dd') : undefined;
 
+    // Validate end date is after start date if recurring
     if (form.isRecurring && form.endDate <= form.date) {
       alert('End date must be after start date');
       return;
     }
 
+    // Prepare payload, exclude endDate and frequency if not recurring
     const payload = {
       categoryId: form.categoryId,
       amount: form.amount,
@@ -71,8 +74,8 @@ const ExpenseForm = () => {
     }
 
     try {
-      await addExpense(payload);
-      alert('Expense added successfully!');
+      await addIncome(payload);
+      alert('Income added successfully!');
       setForm({
         categoryId: '',
         amount: '',
@@ -84,7 +87,7 @@ const ExpenseForm = () => {
         endDate: addDays(new Date(), 1),
       });
     } catch (error) {
-      alert(error.response?.data?.message || 'Error adding expense');
+      alert(error.response?.data?.message || 'Error adding income');
     }
   };
 
@@ -115,7 +118,7 @@ const ExpenseForm = () => {
           <Text style={styles.modalLabel}>Category Name</Text>
           <TextInput
             style={styles.modalInput}
-            placeholder="e.g., Groceries"
+            placeholder="e.g., Salary"
             placeholderTextColor="#999"
             value={newCategory.name}
             onChangeText={(text) => setNewCategory({ ...newCategory, name: text })}
@@ -247,7 +250,7 @@ const ExpenseForm = () => {
       />
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Add Expense</Text>
+        <Text style={styles.submitButtonText}>Add Income</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -348,4 +351,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ExpenseForm;
+export default IncomeForm;
