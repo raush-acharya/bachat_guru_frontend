@@ -34,6 +34,7 @@ export const forgotPassword = (email) =>
   api.post("/auth/forgot-password", { email });
 export const resetPassword = (token, password) =>
   api.post(`/auth/reset-password/${token}`, { password });
+export const changePassword = (data) => api.post("/auth/change-password", data);
 export const addExpense = (data) => api.post("/expense", data);
 export const getExpenses = (params) => api.get("/expense", { params });
 export const getDashboard = (params) => api.get("/dashboard", { params });
@@ -41,8 +42,9 @@ export const getCategories = (params) => api.get("/category", { params });
 export const addCategory = (data) => api.post("/category", data);
 export const addIncome = (data) => api.post("/income", data);
 export const addLoan = (data) => api.post("/loan", data);
-export const getLoan = (params) => api.get("/loan", { params }); 
-export const recordLoanPayment = (loanId, paymentData) => api.post(`/loan/${loanId}/payment`, paymentData);
+export const getLoan = (params) => api.get("/loan", { params });
+export const recordLoanPayment = (loanId, paymentData) =>
+  api.post(`/loan/${loanId}/payment`, paymentData);
 export const addBudget = (data) => api.post("/budget", data);
 export const getTransactions = (params) => api.get("/transactions", { params });
 export const getBudget = (params) => api.get("/budget", { params });

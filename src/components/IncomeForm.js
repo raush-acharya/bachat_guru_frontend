@@ -23,16 +23,20 @@ const IncomeForm = () => {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', type: 'income' });
+  const [isPickerFocused, setIsPickerFocused] = useState(false);
 
+  // Function to fetch categories from the database
+  const fetchCategories = async () => {
+    try {
+      const response = await getCategories({ type: 'income' });
+      setCategories(response.data.categories || []);
+    } catch (error) {
+      alert('Error fetching categories');
+    }
+  };
+
+  // Initial fetch on component mount
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await getCategories({ type: 'income' });
-        setCategories(response.data.categories || []);
-      } catch (error) {
-        alert('Error fetching categories');
-      }
-    };
     fetchCategories();
   }, []);
 
@@ -91,26 +95,38 @@ const IncomeForm = () => {
     }
   };
 
+  // Handle dropdown focus - fetch categories when dropdown is clicked
+  const handlePickerFocus = () => {
+    setIsPickerFocused(true);
+    fetchCategories(); // Fetch categories each time the dropdown is clicked
+  };
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.label}>Category</Text>
-      <Picker
-        selectedValue={form.categoryId}
-        style={styles.input}
-        onValueChange={(value) => {
-          if (value === 'add') {
-            setModalVisible(true);
-          } else {
-            setForm({ ...form, categoryId: value });
-          }
-        }}
-      >
-        <Picker.Item label="Select category" value="" />
-        {categories.map((category) => (
-          <Picker.Item key={category._id} label={category.name} value={category._id} />
-        ))}
-        <Picker.Item label="Add Category" value="add" />
-      </Picker>
+      <TouchableOpacity onPress={handlePickerFocus}>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={form.categoryId}
+            style={styles.input}
+            onFocus={handlePickerFocus}
+            onValueChange={(value) => {
+              setIsPickerFocused(false);
+              if (value === 'add') {
+                setModalVisible(true);
+              } else {
+                setForm({ ...form, categoryId: value });
+              }
+            }}
+          >
+            <Picker.Item label="Select category" value="" />
+            {categories.map((category) => (
+              <Picker.Item key={category._id} label={category.name} value={category._id} />
+            ))}
+            <Picker.Item label="Add Category" value="add" />
+          </Picker>
+        </View>
+      </TouchableOpacity>
 
       <Modal isVisible={isModalVisible} onBackdropPress={() => setModalVisible(false)}>
         <View style={styles.modalContent}>
@@ -273,6 +289,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 16,
     color: '#333',
+  },
+  pickerContainer: {
+    backgroundColor: '#E6F7F3',
+    borderRadius: 10,
+    marginBottom: 15,
   },
   notesInput: {
     height: 100,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { recordLoanPayment, payoffLoan } from "../api/api";
 import { format } from "date-fns";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const PayLoanScreen = ({ navigation, route }) => {
   const {
@@ -26,10 +27,10 @@ const PayLoanScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [paymentProgress, setPaymentProgress] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
+  const [payoffDetails, setPayoffDetails] = useState(null);
   const [customAmount, setCustomAmount] = useState(paymentAmount.toString());
-  const [paymentDate, setPaymentDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [paymentDate, setPaymentDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const isValidAmount = () => {
     const amount = parseFloat(customAmount);
@@ -43,7 +44,6 @@ const PayLoanScreen = ({ navigation, route }) => {
     });
   };
 
-  // Add this function to ensure valid input
   const handleAmountChange = (text) => {
     // Only allow numbers and decimal point
     const filteredText = text.replace(/[^0-9.]/g, "");
@@ -57,8 +57,15 @@ const PayLoanScreen = ({ navigation, route }) => {
     setCustomAmount(filteredText);
   };
 
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setPaymentDate(selectedDate);
+    }
+  };
+
   const handlePayLoan = async () => {
-    if (!isValidAmount()) {
+    if (!isValidAmount() && !isEarlyPayoff) {
       Alert.alert(
         "Invalid Amount",
         "Please enter a valid payment amount that doesn't significantly exceed the remaining balance."
@@ -75,10 +82,27 @@ const PayLoanScreen = ({ navigation, route }) => {
       }
     } catch (error) {
       console.error("Payment Error:", error);
-      Alert.alert(
-        "Error",
-        error.response?.data?.message || "Failed to record payment."
-      );
+      if (error.response?.data?.suggestedPayment) {
+        Alert.alert(
+          "Payment Too Large",
+          `The payment amount significantly exceeds the remaining balance. Suggested payment: $${formatCurrency(error.response.data.suggestedPayment)}`,
+          [
+            {
+              text: "Use Suggested",
+              onPress: () => setCustomAmount(error.response.data.suggestedPayment.toString())
+            },
+            {
+              text: "Cancel",
+              style: "cancel"
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          error.response?.data?.message || "Failed to record payment."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -86,7 +110,6 @@ const PayLoanScreen = ({ navigation, route }) => {
 
   const handleRegularPayment = async () => {
     try {
-      // Ensure payment amount is a valid number greater than 0
       const amount = parseFloat(customAmount);
 
       if (isNaN(amount) || amount <= 0) {
@@ -95,7 +118,7 @@ const PayLoanScreen = ({ navigation, route }) => {
 
       const { data } = await recordLoanPayment(loanId, {
         paymentAmount: amount,
-        paymentDate: paymentDate,
+        paymentDate: paymentDate.toISOString(),
       });
 
       setPaymentProgress(data.paymentProgress);
@@ -120,14 +143,16 @@ const PayLoanScreen = ({ navigation, route }) => {
   const handleEarlyPayoff = async () => {
     try {
       const { data } = await payoffLoan(loanId);
+      setPayoffDetails(data.payoffDetails);
 
-      // Display payoff info
       Alert.alert(
         "Loan Paid Off!",
-        `Your loan has been fully paid off. Total paid: $${formatCurrency(
-          data.payoffDetails.totalPaid
-        )}`,
+        `Your loan has been fully paid off. You saved $${formatCurrency(data.payoffDetails.savings)} by paying early!`,
         [
+          {
+            text: "View Details",
+            onPress: () => {}, // Stay on current screen to show details
+          },
           {
             text: "Return to Loans",
             onPress: () =>
@@ -183,12 +208,28 @@ const PayLoanScreen = ({ navigation, route }) => {
             </Text>
           </View>
           <View style={styles.column}>
+            <Text style={styles.label}>Payment Frequency</Text>
+            <Text style={styles.value}>
+              {loanDetails.paymentFrequency.charAt(0).toUpperCase() + 
+                loanDetails.paymentFrequency.slice(1)}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.column}>
             <Text style={styles.label}>Progress</Text>
             <Text style={styles.value}>
               {formatCurrency(
-                (loanDetails.amountPaid / loanDetails.totalAmount) * 100
-              )}
-              %
+                (loanDetails.amountPaid / loanDetails.amount) * 100
+              )}%
+            </Text>
+          </View>
+          <View style={styles.column}>
+            <Text style={styles.label}>Compounding</Text>
+            <Text style={styles.value}>
+              {loanDetails.compoundingFrequency.charAt(0).toUpperCase() + 
+                loanDetails.compoundingFrequency.slice(1)}
             </Text>
           </View>
         </View>
@@ -196,8 +237,13 @@ const PayLoanScreen = ({ navigation, route }) => {
         {isEarlyPayoff ? (
           <View style={styles.earlyPayoffContainer}>
             <Text style={styles.warningText}>
-              This will pay off your entire loan balance plus any final
-              interest.
+              This will pay off your entire loan balance plus any accrued interest.
+            </Text>
+            <Text style={styles.infoText}>
+              Remaining balance: ${formatCurrency(remainingBalance)}
+            </Text>
+            <Text style={styles.infoText}>
+              Paying off early will save you money on future interest!
             </Text>
           </View>
         ) : (
@@ -221,9 +267,26 @@ const PayLoanScreen = ({ navigation, route }) => {
             {parseFloat(customAmount) !== paymentAmount && (
               <Text style={styles.customAmountNote}>
                 {parseFloat(customAmount) > paymentAmount
-                  ? "Making a larger payment will reduce your loan term."
+                  ? "Making a larger payment will reduce your principal faster and save on interest."
                   : "Making a smaller payment may extend your loan term."}
               </Text>
+            )}
+            
+            <Text style={styles.label}>Payment Date</Text>
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text>{format(paymentDate, "MMM d, yyyy")}</Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={paymentDate}
+                mode="date"
+                display="default"
+                onChange={handleDateChange}
+                maximumDate={new Date()}
+              />
             )}
           </View>
         )}
@@ -301,14 +364,44 @@ const PayLoanScreen = ({ navigation, route }) => {
         </View>
       )}
 
+      {payoffDetails && (
+        <View style={styles.resultsContainer}>
+          <Text style={styles.sectionHeader}>Payoff Summary</Text>
+          <View style={styles.paymentResultRow}>
+            <Text style={styles.detailLabel}>Final Payment:</Text>
+            <Text style={styles.detailValue}>
+              ${formatCurrency(payoffDetails.finalPayment)}
+            </Text>
+          </View>
+          <View style={styles.paymentResultRow}>
+            <Text style={styles.detailLabel}>Final Interest:</Text>
+            <Text style={styles.detailValue}>
+              ${formatCurrency(payoffDetails.finalInterest)}
+            </Text>
+          </View>
+          <View style={styles.paymentResultRow}>
+            <Text style={styles.detailLabel}>Total Paid:</Text>
+            <Text style={styles.detailValue}>
+              ${formatCurrency(payoffDetails.totalPaid)}
+            </Text>
+          </View>
+          <View style={styles.paymentResultRow}>
+            <Text style={styles.detailLabel}>Savings:</Text>
+            <Text style={[styles.detailValue, styles.savingsValue]}>
+              ${formatCurrency(payoffDetails.savings)}
+            </Text>
+          </View>
+        </View>
+      )}
+
       <TouchableOpacity
         style={[
           styles.payButton,
           loading && styles.disabledButton,
-          !isValidAmount() && styles.disabledButton,
+          (!isValidAmount() && !isEarlyPayoff) && styles.disabledButton,
         ]}
         onPress={handlePayLoan}
-        disabled={loading || !isValidAmount()}
+        disabled={loading || (!isValidAmount() && !isEarlyPayoff)}
       >
         {loading ? (
           <ActivityIndicator color="#FFFFFF" />
@@ -411,10 +504,18 @@ const styles = StyleSheet.create({
     color: "#FF6D00",
     fontWeight: "500",
     textAlign: "center",
+    marginBottom: 8,
+  },
+  infoText: {
+    color: "#0E3E3E",
+    textAlign: "center",
+    fontSize: 14,
+    marginTop: 5,
   },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 15,
   },
   amountInput: {
     flex: 1,
@@ -423,6 +524,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
+  },
+  dateInput: {
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15,
   },
   resetButton: {
     marginLeft: 10,
@@ -438,7 +546,8 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 14,
     fontStyle: "italic",
-    marginTop: 5,
+    marginTop: 2,
+    marginBottom: 15,
   },
   paymentResultRow: {
     flexDirection: "row",
@@ -453,6 +562,10 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 15,
     color: "#666",
+  },
+  savingsValue: {
+    color: "#00D09E",
+    fontWeight: "bold",
   },
   payButton: {
     backgroundColor: "#00D09E",

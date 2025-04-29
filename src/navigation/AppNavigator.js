@@ -22,6 +22,8 @@ import ProfileScreen from "../screens/ProfileScreen";
 import BudgetScreen from "../screens/BudgetScreen";
 import LoanScreen from "../screens/LoanScreen";
 import PayLoanScreen from "../screens/PayLoanScreen";
+import SecurityScreen from "../screens/SecurityScreen";
+import ChangePasswordScreen from "../screens/ChangePasswordScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -175,10 +177,20 @@ const AppNavigator = () => (
         options={{ headerShown: false }}
       />
       <Stack.Screen
-          name="PayLoanScreen"
-          component={PayLoanScreen}
-          options={{ headerShown: false }}
-        />
+        name="PayLoanScreen"
+        component={PayLoanScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SecurityScreen"
+        component={SecurityScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ChangePasswordScreen"
+        component={ChangePasswordScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   </NavigationContainer>
 );

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  FlatList, 
+  TouchableOpacity, 
+  ActivityIndicator, 
+  Alert
+} from "react-native";
 import { format } from "date-fns";
 import { getBudget } from "../api/api";
 import * as Progress from "react-native-progress";
@@ -7,19 +15,31 @@ import { Ionicons } from "@expo/vector-icons";
 
 const BudgetScreen = ({ navigation }) => {
   const [budgets, setBudgets] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchBudgets = async () => {
+    setLoading(true);
     try {
       const { data } = await getBudget();
       setBudgets(data.budgets || []);
     } catch (error) {
       console.error("Fetch Budgets Error:", error);
+      Alert.alert("Error", "Failed to load budgets. Please try again.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
     fetchBudgets();
   }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchBudgets();
+  };
 
   const renderBudget = ({ item }) => {
     const progress = item.spent / item.amount;
@@ -59,6 +79,15 @@ const BudgetScreen = ({ navigation }) => {
     );
   };
 
+  const renderFooter = () => {
+    if (!loading) return null;
+    return (
+      <View style={styles.footer}>
+        <ActivityIndicator size="small" color="#00D09E" />
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -68,8 +97,15 @@ const BudgetScreen = ({ navigation }) => {
         <Text style={styles.headerTitle}>Your Budgets</Text>
       </View>
 
-      {budgets.length === 0 ? (
-        <Text style={styles.noBudgets}>No budgets found.</Text>
+      {budgets.length === 0 && !loading ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.noBudgets}>No budgets found.</Text>
+          <TouchableOpacity 
+            style={styles.refreshButton}
+            onPress={handleRefresh}>
+            <Text style={styles.refreshButtonText}>Refresh</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <FlatList
           data={budgets}
@@ -77,6 +113,9 @@ const BudgetScreen = ({ navigation }) => {
           keyExtractor={(item) => item._id}
           style={styles.budgetList}
           contentContainerStyle={{ paddingBottom: 20 }}
+          ListFooterComponent={renderFooter}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         />
       )}
     </View>
@@ -103,6 +142,11 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 15,
     marginBottom: 10,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
   },
   budgetHeader: {
     flexDirection: "row",
@@ -154,6 +198,26 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     marginTop: 20,
+  },
+  footer: {
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  refreshButton: {
+    backgroundColor: "#00D09E",
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 15,
+  },
+  refreshButtonText: {
+    color: "#F1FFF3",
+    fontWeight: "bold",
   },
 });
 
