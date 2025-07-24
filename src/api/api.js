@@ -1,8 +1,10 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
+// "http://192.168.1.69:8000/api"
+
 const api = axios.create({
-  baseURL: "http://192.168.1.69:8000/api",
+  baseURL: "https://bachat-guru-backend.onrender.com/api",
   headers: { "Content-Type": "application/json" },
   timeout: 10000,
 });

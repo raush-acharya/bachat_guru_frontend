@@ -34,7 +34,8 @@
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "^4.10.0",
     "react-native-switch": "^1.5.1",
-    "react-native-tab-view": "^4.0.10"
+    "react-native-tab-view": "^4.0.10",
+    "expo-constants": "~17.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
