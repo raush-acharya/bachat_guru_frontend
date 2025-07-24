@@ -2,7 +2,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
 // "http://192.168.1.69:8000/api"
-
+// https://bachat-guru-backend.onrender.com/api
 const api = axios.create({
   baseURL: "https://bachat-guru-backend.onrender.com/api",
   headers: { "Content-Type": "application/json" },
@@ -29,6 +29,7 @@ api.interceptors.response.use(
   }
 );
 
+// Existing endpoints
 export const login = (email, password) =>
   api.post("/auth/login", { email, password });
 export const signup = (data) => api.post("/auth/register", data);
@@ -52,3 +53,9 @@ export const getTransactions = (params) => api.get("/transactions", { params });
 export const getBudget = (params) => api.get("/budget", { params });
 export const getIncome = (params) => api.get("/income", { params });
 export const getUser = () => api.get("/auth/user");
+
+// New OCR endpoint
+export const processBill = (formData) =>
+  axios.post("https://ocr-5o6m.onrender.com/process-bill", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });

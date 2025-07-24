@@ -15,7 +15,7 @@ import CheckEmailScreen from "../screens/CheckEmailScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ExpenseScreen from "../screens/ExpenseScreen";
 import DashboardScreen from "../screens/DashboardScreen";
-import AnalysisScreen from "../screens/AnalysisScreen";
+import OCRScreen from "../screens/OCRScreen";
 import AddTransactionScreen from "../screens/AddTransactionScreen";
 import TransactionsScreen from "../screens/TransactionsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
@@ -105,7 +105,7 @@ const MainTabs = () => (
     />
     <Tab.Screen
       name="Analysis"
-      component={AnalysisScreen}
+      component={OCRScreen}
       options={{ headerShown: false }}
     />
     <Tab.Screen

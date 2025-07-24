@@ -156,14 +156,14 @@ const LoanScreen = ({ navigation, route }) => {
         <Text style={styles.lenderName}>Lender: {item.lenderName}</Text>
         <View style={styles.row}>
           <Text style={styles.loanAmount}>
-            Amount: ${formatCurrency(item.amount)}
+            Amount: Rs.{formatCurrency(item.amount)}
           </Text>
           <Text style={styles.interestRate}>Rate: {item.interestRate}%</Text>
         </View>
         
         <View style={styles.row}>
           <Text style={styles.paymentDetail}>
-            Payment: ${formatCurrency(item.paymentAmount)}
+            Payment: Rs.{formatCurrency(item.paymentAmount)}
           </Text>
           <Text style={styles.paymentDetail}>
             {formatFrequency(item.paymentFrequency)}
@@ -173,7 +173,7 @@ const LoanScreen = ({ navigation, route }) => {
         {item.status === "active" && (
           <View style={styles.balanceView}>
             <Text style={styles.remainingBalance}>
-              Remaining: ${formatCurrency(item.remainingBalance)}
+              Remaining: Rs.{formatCurrency(item.remainingBalance)}
             </Text>
             <View style={styles.progressBarContainer}>
               <View 

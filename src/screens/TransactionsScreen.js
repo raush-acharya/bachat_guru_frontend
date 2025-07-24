@@ -213,7 +213,7 @@ const TransactionsScreen = ({ navigation }) => {
         </Text>
         <Text style={styles.transactionSubtitle}>{item.notes || "No description"}</Text>
         <Text style={styles.transactionDate}>
-          {format(new Date(item.date), "HH:mm")} -{" "}
+          {/* {format(new Date(item.date), "HH:mm")} -{" "} */}
           {format(new Date(item.date), "MMM d")}
         </Text>
       </View>
@@ -223,7 +223,7 @@ const TransactionsScreen = ({ navigation }) => {
           item.type === "income" ? styles.income : styles.expense,
         ]}
       >
-        {item.type === "income" ? "+" : "-"}${(item.amount || 0).toFixed(2)}
+        Rs.{(item.amount || 0).toFixed(2)}
       </Text>
     </View>
   );
@@ -253,7 +253,7 @@ const TransactionsScreen = ({ navigation }) => {
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Total Balance</Text>
           <Text style={styles.balanceAmount}>
-            ${totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            Rs.{totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </Text>
         </View>
         <View style={styles.summaryCard}>
@@ -267,7 +267,7 @@ const TransactionsScreen = ({ navigation }) => {
             <Ionicons name="trending-up" size={24} color="#F1FFF3" />
             <Text style={styles.summaryLabel}>Income</Text>
             <Text style={styles.summaryAmount}>
-              ${totalIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+              Rs.{totalIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -280,7 +280,7 @@ const TransactionsScreen = ({ navigation }) => {
             <Ionicons name="trending-down" size={24} color="#F1FFF3" />
             <Text style={styles.summaryLabel}>Expense</Text>
             <Text style={styles.summaryAmount}>
-              ${totalExpense.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+              Rs.{totalExpense.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </Text>
           </TouchableOpacity>
         </View>

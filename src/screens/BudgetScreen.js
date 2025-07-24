@@ -57,13 +57,13 @@ const BudgetScreen = ({ navigation }) => {
             {format(new Date(item.endDate), "MMM d, yyyy")}
           </Text>
           <Text style={styles.budgetAmount}>
-            Budget: ${item.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            Budget: Rs.{item.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </Text>
           <Text style={styles.spentAmount}>
-            Spent: ${item.spent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            Spent: Rs.{item.spent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </Text>
           <Text style={[styles.remainingAmount, isOverBudget && styles.overBudget]}>
-            Remaining: ${item.remaining.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            Remaining: Rs.{item.remaining.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </Text>
           {item.notes ? <Text style={styles.notes}>Notes: {item.notes}</Text> : null}
         </View>

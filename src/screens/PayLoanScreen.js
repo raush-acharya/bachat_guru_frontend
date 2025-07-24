@@ -204,7 +204,7 @@ const PayLoanScreen = ({ navigation, route }) => {
           <View style={styles.column}>
             <Text style={styles.label}>Remaining Balance</Text>
             <Text style={styles.value}>
-              ${formatCurrency(remainingBalance)}
+              Rs.{formatCurrency(remainingBalance)}
             </Text>
           </View>
           <View style={styles.column}>
@@ -240,7 +240,7 @@ const PayLoanScreen = ({ navigation, route }) => {
               This will pay off your entire loan balance plus any accrued interest.
             </Text>
             <Text style={styles.infoText}>
-              Remaining balance: ${formatCurrency(remainingBalance)}
+              Remaining balance: Rs.{formatCurrency(remainingBalance)}
             </Text>
             <Text style={styles.infoText}>
               Paying off early will save you money on future interest!
@@ -298,19 +298,19 @@ const PayLoanScreen = ({ navigation, route }) => {
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Amount Paid:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(paymentDetails.amount)}
+              Rs.{formatCurrency(paymentDetails.amount)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Interest:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(paymentDetails.interest)}
+              Rs.{formatCurrency(paymentDetails.interest)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Principal:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(paymentDetails.principalPaid)}
+              Rs.{formatCurrency(paymentDetails.principalPaid)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
@@ -328,31 +328,31 @@ const PayLoanScreen = ({ navigation, route }) => {
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Original Amount:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(paymentProgress.originalAmount)}
+              Rs.{formatCurrency(paymentProgress.originalAmount)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Total with Interest:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(paymentProgress.totalWithInterest)}
+              Rs.{formatCurrency(paymentProgress.totalWithInterest)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Amount Paid:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(paymentProgress.amountPaid)}
+              Rs.{formatCurrency(paymentProgress.amountPaid)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Amount Remaining:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(paymentProgress.amountRemaining)}
+              Rs.{formatCurrency(paymentProgress.amountRemaining)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Remaining Balance:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(paymentProgress.remainingBalance)}
+              Rs.{formatCurrency(paymentProgress.remainingBalance)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
@@ -370,25 +370,25 @@ const PayLoanScreen = ({ navigation, route }) => {
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Final Payment:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(payoffDetails.finalPayment)}
+              Rs.{formatCurrency(payoffDetails.finalPayment)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Final Interest:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(payoffDetails.finalInterest)}
+              Rs.{formatCurrency(payoffDetails.finalInterest)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Total Paid:</Text>
             <Text style={styles.detailValue}>
-              ${formatCurrency(payoffDetails.totalPaid)}
+              Rs.{formatCurrency(payoffDetails.totalPaid)}
             </Text>
           </View>
           <View style={styles.paymentResultRow}>
             <Text style={styles.detailLabel}>Savings:</Text>
             <Text style={[styles.detailValue, styles.savingsValue]}>
-              ${formatCurrency(payoffDetails.savings)}
+              Rs.{formatCurrency(payoffDetails.savings)}
             </Text>
           </View>
         </View>

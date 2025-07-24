@@ -148,8 +148,9 @@ const HomeScreen = ({ navigation }) => {
       </View>
       <View style={styles.transactionDetails}>
         <Text style={styles.transactionTitle}>{item.categoryId.name}</Text>
+        <Text style={styles.transactionSubtitle}>{item.notes || "No description"}</Text>
         <Text style={styles.transactionDate}>
-          {format(new Date(item.date), "HH:mm")} -{" "}
+          {/* {format(new Date(item.date), "HH:mm")} -{" "} */}
           {format(new Date(item.date), "MMM d")}
         </Text>
       </View>
@@ -159,7 +160,7 @@ const HomeScreen = ({ navigation }) => {
           item.type === "income" ? styles.income : styles.expense,
         ]}
       >
-        {item.type === "income" ? "+" : "-"}${item.amount.toFixed(2)}
+        Rs.{item.amount.toFixed(2)}
       </Text>
     </View>
   );
@@ -175,7 +176,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Total Balance</Text>
           <Text style={styles.balanceAmount}>
-            $
+            Rs 
             {totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </Text>
           <Text style={styles.balanceProgress}>
@@ -193,7 +194,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.expenseCard}>
           <Text style={styles.expenseLabel}>Total Expense</Text>
           <Text style={styles.expenseAmount}>
-            -$
+            Rs 
             {totalExpense.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </Text>
         </View>
@@ -363,6 +364,10 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 15,
     marginBottom: 10,
+  },
+    transactionSubtitle: {
+    fontSize: 14,
+    color: "#666",
   },
   transactionIcon: {
     backgroundColor: "#E0E0E0",
